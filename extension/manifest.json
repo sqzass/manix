@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Lumen",
-    "version": "0.1.0.22",
+    "version": "0.2.0.2",
     "description": "Manix's nightly version.",
     "action": {
         "default_title": "Lumen",
@@ -12,5 +12,8 @@
     },
     "permissions": [
         "storage"
-    ]
+    ],
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'self'"
+    }
 }

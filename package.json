@@ -4,13 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node scripts/test.js",
-    "lint": "node scripts/lint.js",
-    "build": "zip -r extension.crx extension/ manifest.json scripts/",
+    "test": "node --test tests/",
+    "lint": "eslint scripts extension/js tests",
+    "build": "zip -r extension.zip extension/",
     "rebrand:nightly": "node scripts/brands.js nightly",
     "rebrand:main": "node scripts/brands.js main"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^8.57.1"
+  }
 }
