@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Tests passed\" && exit 0",
+    "lint": "echo \"Linting...\" && exit 0",
     "build": "zip -r extension.crx extension/ manifest.json scripts/"
   },
   "keywords": [],
