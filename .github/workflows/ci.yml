@@ -2,7 +2,9 @@ name: ci
 
 on:
   push:
-    branches: [nightly, main]
+    branches: [nightly, beta, main]
+  pull_request:
+    branches: [nightly, beta, main]
 
 jobs:
   test-and-lint:
@@ -16,30 +18,128 @@ jobs:
       - name: Lint
         run: npm run lint
 
-  build-crx:
+  release:
     needs: test-and-lint
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/nightly' || github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Build CRX
-        run: npm run build
-
-      - name: Tag CRX for branch
+      - name: Calculate semantic version
+        id: version
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         shell: bash
         run: |
-          if [[ "$GITHUB_REF" == "refs/heads/nightly" ]]; then
-            artifact_name="extension-nightly-${GITHUB_SHA}"
+          set -euo pipefail
+
+          subject="${COMMIT_MESSAGE%%$'\n'*}"
+          subject="${subject,,}"
+
+          if [[ "$subject" =~ ^(major|minor|patch):[[:space:]]* ]]; then
+            bump="${BASH_REMATCH[1]}"
           else
-            artifact_name="extension-release-${GITHUB_SHA}"
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            echo "Commit message must start with major:, minor:, or patch:. Skipping release."
+            exit 0
           fi
 
-          mv extension.crx "${artifact_name}.crx"
-          echo "name=${artifact_name}" >> "$GITHUB_ENV"
+          # Avoid creating another release if this workflow is rerun for an already-tagged commit.
+          existing_tag="$(
+            git tag --points-at "$GITHUB_SHA" |
+              grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' |
+              sort -V |
+              tail -n 1 || true
+          )"
 
-      - name: Upload CRX artifact
-        uses: actions/upload-artifact@v4
+          if [[ -n "$existing_tag" ]]; then
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            echo "This commit already has release tag $existing_tag. Skipping."
+            exit 0
+          fi
+
+          latest_tag="$(
+            git tag --list 'v[0-9]*' |
+              grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' |
+              sort -V |
+              tail -n 1 || true
+          )"
+
+          if [[ -z "$latest_tag" ]]; then
+            major=0
+            minor=0
+            patch=0
+          else
+            IFS=. read -r major minor patch <<< "${latest_tag#v}"
+          fi
+
+          case "$bump" in
+            major)
+              major=$((major + 1))
+              minor=0
+              patch=0
+              ;;
+            minor)
+              minor=$((minor + 1))
+              patch=0
+              ;;
+            patch)
+              patch=$((patch + 1))
+              ;;
+          esac
+
+          version="v${major}.${minor}.${patch}"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "should_release=true" >> "$GITHUB_OUTPUT"
+          echo "Will create release $version"
+
+      - name: Set up Chrome
+        if: steps.version.outputs.should_release == 'true'
+        uses: browser-actions/setup-chrome@v1
+
+      - name: Package signed CRX
+        if: steps.version.outputs.should_release == 'true'
+        env:
+          CRX_PRIVATE_KEY: ${{ secrets.CRX_PRIVATE_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ -z "$CRX_PRIVATE_KEY" ]]; then
+            echo "CRX_PRIVATE_KEY secret is not set."
+            exit 1
+          fi
+
+          key_file="$RUNNER_TEMP/extension.pem"
+          package_dir="$RUNNER_TEMP/extension-package"
+          trap 'rm -f "$key_file"' EXIT
+
+          printf '%s\n' "$CRX_PRIVATE_KEY" > "$key_file"
+          chmod 600 "$key_file"
+
+          mkdir -p "$package_dir"
+          cp -R extension manifest.json scripts "$package_dir/"
+
+          chrome --pack-extension="$package_dir" \
+            --pack-extension-key="$key_file"
+
+          crx_file="${package_dir}.crx"
+          if [[ ! -f "$crx_file" ]]; then
+            echo "Chrome did not create the expected CRX file: $crx_file"
+            exit 1
+          fi
+
+          mv "$crx_file" "$GITHUB_WORKSPACE/extension-${{ steps.version.outputs.version }}.crx"
+
+      - name: Create GitHub Release and upload CRX
+        if: steps.version.outputs.should_release == 'true'
+        uses: softprops/action-gh-release@v2
         with:
-          name: ${{ env.name }}
-          path: extension-*.crx
+          tag_name: ${{ steps.version.outputs.version }}
+          name: ${{ steps.version.outputs.version }}
+          generate_release_notes: true
+          files: extension-*.crx
