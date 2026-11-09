@@ -30,7 +30,11 @@
         },
     };
 
-    const $ = s => document.querySelector(s);
+    const $ = s => {
+        const el = document.querySelector(s);
+        if (!el) throw new Error(`[popup] missing element: ${s}`);
+        return el;
+    };
     const rootEl = document.documentElement;
     const body = document.body;
 
