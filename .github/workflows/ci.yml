@@ -126,7 +126,8 @@ jobs:
 
           cp -R extension "$package_dir"
 
-          chrome --pack-extension="$package_dir" \
+          chrome --no-sandbox \
+           --pack-extension="$package_dir" \
             --pack-extension-key="$key_file"
 
           crx_file="${package_dir}.crx"
