@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="utf-8">
+    <title>Lumen</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Instrument+Sans:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/popup.css">
+</head>
+
+<body>
+    <div class="rail" id="rail" aria-hidden="true">
+        <span class="pct">0%</span>
+    </div>
+    <header class="masthead" id="masthead">
+        <div class="mast-row">
+            <span class="mark" aria-hidden="true"></span>
+            <div class="mast-id">
+                <h1 class="wordmark" id="brandName">LUMEN</h1>
+                <p class="channel">
+                    <span class="tag" id="channelTag">nightly</span>
+                    <span class="ver" id="verTag">v0.1.0</span>
+                </p>
+            </div>
+            <span class="mast-state">scaffold</span>
+        </div>
+    </header>
+
+    <main class="deck">
+        <p class="deck-note">Scaffold build — functions land in later pushes. The stack below is reserved for them.</p>
+
+        <section class="block" style="--d:0">
+            <button class="block-head" id="head-status" aria-expanded="false" aria-controls="panel-status">
+                <span class="idx">01</span>
+                <span class="title">Status</span>
+                <span class="meta">runtime</span>
+                <svg class="caret" viewBox="0 0 12 12" aria-hidden="true">
+                    <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6"
+                        stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </button>
+            <div class="drop">
+                <div class="drop-in">
+                    <div class="panel" id="panel-status" role="region" aria-labelledby="head-status">
+                        <div class="kv"><span>manifest</span><b>MV3</b></div>
+                        <div class="kv"><span>channel</span><b id="kvChannel">nightly - Lumen</b></div>
+                        <div class="kv"><span>build</span><b id="kvBuild">0.1.0</b></div>
+                        <div class="kv"><span>modules</span><b>0 mounted</b></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="block" style="--d:1">
+            <button class="block-head" id="head-modules" aria-expanded="false" aria-controls="panel-modules">
+                <span class="idx">02</span>
+                <span class="title">Modules</span>
+                <span class="meta">0 mounted</span>
+                <svg class="caret" viewBox="0 0 12 12" aria-hidden="true">
+                    <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6"
+                        stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </button>
+            <div class="drop">
+                <div class="drop-in">
+                    <div class="panel" id="panel-modules" role="region" aria-labelledby="head-modules">
+                        <p class="note">Nothing mounted yet. Modules slot into this stack once the design settles.</p>
+                        <div class="slot"><span>slot - 01</span><em>awaiting function</em></div>
+                        <div class="slot"><span>slot - 02</span><em>awaiting function</em></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="block" style="--d:2">
+            <button class="block-head" id="head-appearance" aria-expanded="false" aria-controls="panel-appearance">
+                <span class="idx">03</span>
+                <span class="title">Appearance</span>
+                <span class="meta">swappable</span>
+                <svg class="caret" viewBox="0 0 12 12" aria-hidden="true">
+                    <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6"
+                        stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </button>
+            <div class="drop">
+                <div class="drop-in">
+                    <div class="panel" id="panel-appearance" role="region" aria-labelledby="head-appearance">
+                        <div class="ap-row">
+                            <span class="ap-label">accent</span>
+                            <span class="accent-name" id="accentName">lavender</span>
+                        </div>
+                        <div class="swatches" role="radiogroup" aria-label="Accent colour">
+                            <button class="swatch" role="radio" aria-checked="false" data-accent="red"
+                                style="--sw:#e5484d" aria-label="red"></button>
+                            <button class="swatch" role="radio" aria-checked="false" data-accent="lavender"
+                                style="--sw:#b3a0f0" aria-label="lavender"></button>
+                            <button class="swatch" role="radio" aria-checked="false" data-accent="pink"
+                                style="--sw:#ef7bb0" aria-label="pink"></button>
+                            <button class="swatch" role="radio" aria-checked="false" data-accent="dark pink"
+                                style="--sw:#d6336c" aria-label="dark pink"></button>
+                            <button class="swatch" role="radio" aria-checked="false" data-accent="blue"
+                                style="--sw:#4a7dff" aria-label="blue"></button>
+                            <button class="swatch" role="radio" aria-checked="false" data-accent="purple"
+                                style="--sw:#8250df" aria-label="purple"></button>
+                        </div>
+                        <div class="ap-rule"></div>
+                        <div class="ap-row">
+                            <span class="ap-label">theme</span>
+                            <div class="seg" id="themeSeg" data-active="dark" role="radiogroup" aria-label="Theme">
+                                <span class="seg-thumb" aria-hidden="true"></span>
+                                <button class="seg-opt" role="radio" aria-checked="true"
+                                    data-theme-opt="dark">Black</button>
+                                <button class="seg-opt" role="radio" aria-checked="false"
+                                    data-theme-opt="light">White</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="block" style="--d:3">
+            <button class="block-head" id="head-branches" aria-expanded="false" aria-controls="panel-branches">
+                <span class="idx">04</span>
+                <span class="title">Branches</span>
+                <span class="meta">3 channels</span>
+                <svg class="caret" viewBox="0 0 12 12" aria-hidden="true">
+                    <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6"
+                        stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </button>
+            <div class="drop">
+                <div class="drop-in">
+                    <div class="panel" id="panel-branches" role="region" aria-labelledby="head-branches">
+                        <div class="flow">
+                            <div class="flow-step">
+                                <span class="dot" aria-hidden="true"></span>
+                                <div><b>Lumen</b><i>nightly - every push lands here</i></div>
+                            </div>
+                            <span class="flow-link" aria-hidden="true"></span>
+                            <div class="flow-step alt">
+                                <span class="dot" aria-hidden="true"></span>
+                                <div><b>Manix</b><i>beta - stable, may still break</i></div>
+                            </div>
+                            <span class="flow-link" aria-hidden="true"></span>
+                            <div class="flow-step alt">
+                                <span class="dot" aria-hidden="true"></span>
+                                <div><b>Manix</b><i>main - stable release</i></div>
+                            </div>
+                        </div>
+                        <p class="flow-note">promotion is automated — .github/workflows/promote.yml</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="foot">
+        <span><span id="footBrand">lumen</span> - scaffold build</span>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/popup.js"></script>
+</body>
+
+</html>

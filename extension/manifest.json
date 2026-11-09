@@ -1,0 +1,16 @@
+{
+    "manifest_version": 3,
+    "name": "Lumen",
+    "version": "0.1.0",
+    "description": "Manix's nightly version.",
+    "action": {
+        "default_title": "Lumen",
+        "default_popup": "popup.html"
+    },
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "permissions": [
+        "storage"
+    ]
+}
