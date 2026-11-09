@@ -50,19 +50,21 @@ jobs:
             exit 0
           fi
 
-          latest_stable_tag="$(
+          latest_version_tag="$(
             git tag --list 'v[0-9]*' |
-              grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' |
+              grep -E '^v[0-9]+\.[0-9]+\.[0-9]+(-nightly\.[0-9]+)?$' |
               sort -V |
               tail -n 1 || true
           )"
 
-          if [[ -z "$latest_stable_tag" ]]; then
+          if [[ -z "$latest_version_tag" ]]; then
             major=0
             minor=0
             patch=0
           else
-            IFS=. read -r major minor patch <<< "${latest_stable_tag#v}"
+            base_version="${latest_version_tag#v}"
+            base_version="${base_version%%-*}"
+            IFS=. read -r major minor patch <<< "$base_version"
           fi
 
           case "$bump" in
@@ -133,6 +135,7 @@ jobs:
 
           console.log(`Set manifest version to ${manifest.version}`);
           NODE
+
       - name: Commit manifest version
         id: manifest
         if: steps.version.outputs.should_release == 'true'
@@ -175,7 +178,7 @@ jobs:
           cp -R extension "$package_dir"
 
           chrome --no-sandbox \
-           --pack-extension="$package_dir" \
+            --pack-extension="$package_dir" \
             --pack-extension-key="$key_file"
 
           crx_file="${package_dir}.crx"
