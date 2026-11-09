@@ -1,0 +1,31 @@
+{
+    "env": {
+        "es2022": true,
+        "browser": true
+    },
+    "parserOptions": {
+        "ecmaVersion": 2022,
+        "sourceType": "commonjs"
+    },
+    "globals": {
+        "chrome": "readonly",
+        "self": "readonly",
+        "document": "readonly",
+        "window": "readonly",
+        "localStorage": "readonly",
+        "process": "readonly",
+        "__dirname": "readonly",
+        "__filename": "readonly",
+        "require": "readonly",
+        "module": "readonly",
+        "exports": "readonly"
+    },
+    "extends": "eslint:recommended",
+    "rules": {
+        "eqeqeq": ["error", "smart"],
+        "no-console": "warn",
+        "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+        "no-var": "error",
+        "prefer-const": "error"
+    }
+}
