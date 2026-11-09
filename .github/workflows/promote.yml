@@ -1,7 +1,6 @@
-# Manix · Lumen — release cascade.
-#   Push to nightly (Lumen) → auto PR into beta (Manix)
-#   Push to beta   (Manix)  → auto PR into main (Manix)
-# Each promotion runs scripts/brand.js so the tree is rebranded
+# Push to nightly (Lumen) → auto PR into beta (Manix)
+# Push to beta   (Manix)  → auto PR into main (Manix)
+# Each promotion runs scripts/brands.js so the tree is rebranded
 # for its destination channel before the PR opens.
 
 name: promote
@@ -37,7 +36,7 @@ jobs:
           # files (incl. the rebranded config) resolve to the incoming side.
           git merge -X theirs --no-ff --no-edit "origin/nightly"
 
-          node scripts/brand.js "beta"
+          node scripts/brands.js "beta"
           git add -A
           git diff --cached --quiet || git commit -m "chore(release): rebrand for beta"
 
@@ -60,7 +59,7 @@ jobs:
             # Nightly→beta PR was just merged, now promote beta→main
             git checkout -B "promote/beta-to-main" "origin/main"
             git merge -X theirs --no-ff --no-edit "origin/beta"
-            node scripts/brand.js "main"
+            node scripts/brands.js "main"
             git add -A
             git diff --cached --quiet || git commit -m "chore(release): rebrand for main"
             if ! git diff --quiet "origin/main" HEAD; then
@@ -71,7 +70,7 @@ jobs:
             HEAD="promote/beta-to-main"
             git checkout -B "$HEAD" "origin/main"
             git merge -X theirs --no-ff --no-edit "origin/beta"
-            node scripts/brand.js "main"
+            node scripts/brands.js "main"
             git add -A
             git diff --cached --quiet || git commit -m "chore(release): rebrand for main"
             if ! git diff --quiet "origin/main" HEAD; then
