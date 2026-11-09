@@ -1,6 +1,5 @@
-# Manix · Lumen — release cascade.
-#   Push to nightly (Lumen) → auto PR into beta (Manix)
-#   Push to beta   (Manix)  → auto PR into main (Manix)
+# Push to nightly (Lumen) → auto PR into beta (Manix)
+# Push to beta   (Manix)  → auto PR into main (Manix)
 # Each promotion runs scripts/brand.js so the tree is rebranded
 # for its destination channel before the PR opens.
 
