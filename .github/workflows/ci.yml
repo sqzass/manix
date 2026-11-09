@@ -103,6 +103,36 @@ jobs:
       - name: Set up Chrome
         if: steps.version.outputs.should_release == 'true'
         uses: browser-actions/setup-chrome@v1
+        
+      - name: Set manifest version
+        if: steps.version.outputs.should_release == 'true'
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          node <<'NODE'
+          const fs = require("node:fs");
+
+          const tag = process.env.RELEASE_VERSION;
+          const match = tag.match(/^v(\d+\.\d+\.\d+)(?:-nightly\.(\d+))?$/);
+
+          if (!match) {
+            throw new Error(`Unsupported release version: ${tag}`);
+          }
+
+          const manifestPath = "extension/manifest.json";
+          const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+
+          // Chrome requires numeric version components; use the nightly run
+          // number as the fourth component.
+          manifest.version = match[2] ? `${match[1]}.${match[2]}` : match[1];
+
+          fs.writeFileSync(
+            manifestPath,
+            `${JSON.stringify(manifest, null, 4)}\n`
+          );
+
+          console.log(`Set manifest version to ${manifest.version}`);
+          NODE
 
       - name: Package signed CRX
         if: steps.version.outputs.should_release == 'true'
