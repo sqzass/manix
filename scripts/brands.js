@@ -3,7 +3,6 @@ const path = require('path');
 
 const CHANNELS = {
     nightly: { brand: 'Lumen', tagline: 'nightly - every push lands here' },
-    beta: { brand: 'Manix', tagline: 'beta - stable, may still break' },
     main: { brand: 'Manix', tagline: 'main - stable' },
 };
 

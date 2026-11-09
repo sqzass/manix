@@ -4,12 +4,16 @@
     const cfg = self.APP_CONFIG || { brand: 'Manix', channel: 'main', version: '0.0.0', defaultAccent: 'lavender' };
 
     const ACCENTS = {
-        'red': '#e5484d',
         'lavender': '#b3a0f0',
+        'red': '#e5484d',
         'pink': '#ef7bb0',
         'dark pink': '#d6336c',
         'blue': '#4a7dff',
         'purple': '#8250df',
+        'white': '#ffffff',
+        'grey': '#808080',
+        'teal': '#22b8cf',
+        'indigo': '#563d7c',
     };
 
     const hasExt = typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync;
@@ -75,7 +79,7 @@
 
     function paintRail() {
         const sh = body.scrollHeight, vh = body.clientHeight, st = body.scrollTop;
-        const p = Math.max(0, Math.min(1, (st + vh) / sh));   // share of the page in view
+        const p = Math.max(0, Math.min(1, (st + vh) / sh));
         beads.forEach((b, i) => {
             const f = Math.max(0, Math.min(1, p * beads.length - i));
             b.style.setProperty('--f', f.toFixed(3));

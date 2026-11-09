@@ -4,8 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "zip -r extension.crx extension/ manifest.json scripts/"
+    "test": "node scripts/test.js",
+    "lint": "node scripts/lint.js",
+    "build": "zip -r extension.crx extension/ manifest.json scripts/",
+    "rebrand:nightly": "node scripts/brands.js nightly",
+    "rebrand:main": "node scripts/brands.js main"
   },
   "keywords": [],
   "author": "",
