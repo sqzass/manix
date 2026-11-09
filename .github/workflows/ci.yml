@@ -15,3 +15,32 @@ jobs:
 
       - name: Lint
         run: npm run lint
+
+  build-crx:
+    needs: test-and-lint
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/nightly' || github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build CRX
+        run: npm run build
+
+      - name: Tag CRX for branch
+        run: |
+          if [[ github.ref == 'refs/heads/nightly' ]]; then
+            mv extension.crx extension-nightly-${{ github.sha }}.crx
+            echo "name=extension-nightly-${{ github.sha }}" >> $GITHUB_ENV
+          else
+            mv extension.crx extension-release-${{ github.sha }}.crx
+            echo "name=extension-release-${{ github.sha }}" >> $GITHUB_ENV
+          fi
+
+      - name: Upload CRX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.name }}
+          path: extension-*.crx

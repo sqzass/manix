@@ -4,9 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Tests passed\" && exit 0",
-    "lint": "echo \"Linting...\" && exit 0",
-    "build": "zip -r extension.crx extension/ manifest.json scripts/"
+    "test": "node scripts/test.js",
+    "lint": "node scripts/lint.js",
+    "build": "zip -r extension.crx extension/ manifest.json scripts/",
+    "rebrand:nightly": "node scripts/brands.js nightly",
+    "rebrand:main": "node scripts/brands.js main"
   },
   "keywords": [],
   "author": "",
