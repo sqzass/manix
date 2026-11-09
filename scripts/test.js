@@ -1,4 +1,3 @@
-// simple sanity check to make sure all files are present
 const fs = require('fs');
 const path = require('path');
 
