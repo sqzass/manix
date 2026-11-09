@@ -66,9 +66,7 @@
             <div class="drop">
                 <div class="drop-in">
                     <div class="panel" id="panel-modules" role="region" aria-labelledby="head-modules">
-                        <p class="note">Nothing mounted yet. Modules slot into this stack once the design settles.</p>
-                        <div class="slot"><span>slot - 01</span><em>awaiting function</em></div>
-                        <div class="slot"><span>slot - 02</span><em>awaiting function</em></div>
+                        <div id="module-list"></div>
                     </div>
                 </div>
             </div>
@@ -91,7 +89,7 @@
                             <span class="ap-label">accent</span>
                             <span class="accent-name" id="accentName">lavender</span>
                         </div>
-                        <div class="swatches" role="radiogroup" aria-label="Accent colour">
+                        <div class="swatches" role="radiogroup" aria-label="Accent colour" id="module-swatches">
                             <button class="swatch" role="radio" aria-checked="false" data-accent="red"
                                 style="--sw:#e5484d" aria-label="red"></button>
                             <button class="swatch" role="radio" aria-checked="false" data-accent="lavender"
@@ -157,7 +155,7 @@
     </footer>
 
     <script src="js/config.js"></script>
+    <script src="js/modules.js"></script>
     <script src="js/popup.js"></script>
-</body>
 
 </html>

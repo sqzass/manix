@@ -13,7 +13,10 @@
     "permissions": [
         "storage"
     ],
+    "host_permissions": [
+        "https://raw.githubusercontent.com/*"
+    ],
     "content_security_policy": {
-        "extension_pages": "script-src 'self'; object-src 'self'"
+        "extension_pages": "script-src 'self' https://raw.githubusercontent.com; object-src 'self'"
     }
 }

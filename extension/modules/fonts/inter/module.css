@@ -1,0 +1,4 @@
+/* Module: Inter Font */
+body {
+    font-family: 'Inter', var(--font-body);
+}

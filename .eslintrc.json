@@ -18,7 +18,8 @@
         "__filename": "readonly",
         "require": "readonly",
         "module": "readonly",
-        "exports": "readonly"
+        "exports": "readonly",
+        "ModuleSystem": "readonly"
     },
     "extends": "eslint:recommended",
     "rules": {

@@ -15,7 +15,6 @@
         'teal': '#22b8cf',
         'indigo': '#563d7c',
     };
-
     const hasExt = typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync;
     const store = {
         get(k) {
@@ -117,6 +116,16 @@
         b.addEventListener('click', () => setTheme(b.dataset.themeOpt, true));
 
     (async () => {
+        // --- Module system ---
+        if (cfg.moduleManifestUrl && self.ModuleSystem) {
+            await ModuleSystem.init(cfg.moduleManifestUrl);
+            for (const [id, hex] of ModuleSystem.API.accents) {
+                ACCENTS[id] = hex;
+            }
+            renderModuleSwatches();
+            renderModuleToggles();
+        }
+
         const [accent, theme] = await Promise.all([store.get('accent'), store.get('theme')]);
         setAccent(ACCENTS[accent] ? accent : cfg.defaultAccent, false);
         setTheme(theme === 'light' ? 'light' : 'dark', false);
@@ -124,4 +133,66 @@
     })();
 
     window.addEventListener('load', buildRail);
+
+    function renderModuleSwatches() {
+        const container = $('#module-swatches');
+        if (!container) return;
+        for (const [id, hex] of ModuleSystem.API.accents) {
+            if (document.querySelector(`[data-accent="${id}"]`)) continue;
+            const b = document.createElement('button');
+            b.className = 'swatch';
+            b.role = 'radio';
+            b.dataset.accent = id;
+            b.style.setProperty('--sw', hex);
+            b.setAttribute('aria-label', id);
+            b.addEventListener('click', () => setAccent(id, true));
+            container.appendChild(b);
+        }
+    }
+
+    function renderModuleToggles() {
+        const list = $('#module-list');
+        if (!list) return;
+        const meta = $('#head-modules .meta');
+        if (meta) meta.textContent = `${ModuleSystem.modules.length} available`;
+
+        list.innerHTML = '';
+        if (ModuleSystem.modules.length === 0) {
+            list.insertAdjacentHTML('beforeend', '<p class="note">No modules found on the registry.</p>');
+            return;
+        }
+
+        for (const mod of ModuleSystem.modules) {
+            const enabled = ModuleSystem.isEnabled(mod.id);
+            const item = document.createElement('div');
+            item.className = 'kv module-item';
+            item.style.padding = '10px 0';
+            item.style.borderBottom = '1px solid var(--line)';
+            item.innerHTML = `
+                <span style="flex:1;">
+                    <b style="display:block">${mod.name}</b>
+                    <em style="display:block; font-size:10px; opacity:0.7">${mod.description}</em>
+                </span>
+                <button class="seg-opt" role="radio" aria-checked="${enabled}"
+                        data-module-id="${mod.id}"
+                        style="font-size:10px; padding:4px 8px; border-radius:6px;
+                               background:var(--bg-3); border:1px solid var(--line);
+                               cursor:pointer; user-select:none; color:var(--ink);
+                               text-align:center;">
+                    ${enabled ? 'enabled' : 'enable'}
+                </button>
+            `;
+            list.appendChild(item);
+        }
+
+        for (const btn of list.querySelectorAll('[data-module-id]')) {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const id = btn.dataset.moduleId;
+                const on = await ModuleSystem.toggle(id);
+                btn.setAttribute('aria-checked', String(on));
+                btn.textContent = on ? 'enabled' : 'enable';
+            });
+        }
+    }
 })();
