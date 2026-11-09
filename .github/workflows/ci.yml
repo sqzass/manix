@@ -2,9 +2,7 @@ name: ci
 
 on:
   push:
-    branches: [ nightly, beta, main ]
-  pull_request:
-    branches: [ nightly, beta, main ]
+    branches: [ nightly, main ]
 
 jobs:
   test-and-lint:

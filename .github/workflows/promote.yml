@@ -1,15 +1,12 @@
-# Push to nightly (Lumen) → auto PR into beta (Manix)
-# Push to beta   (Manix)  → auto PR into main (Manix)
+# Push to nightly (Lumen) → promotes to stable (Manix)
 # Each promotion runs scripts/brands.js so the tree is rebranded
-# for its destination channel before the PR opens.
+# PRs are created manually from the GitHub website
 
 name: promote
 
 on:
   push:
     branches: [nightly]
-  pull_request:
-    branches: [nightly, beta]
 
 permissions:
   contents: write
@@ -23,88 +20,20 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Compose promotion branch (nightly → beta)
+      - name: Compose promotion branch (nightly → main)
         if: github.event_name == 'push'
         run: |
           git config user.name "manix-bot"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          HEAD="promote/nightly-to-beta"
-          git checkout -B "$HEAD" "origin/beta"
+          HEAD="promote/nightly-to-main"
+          git checkout -B "$HEAD" "origin/main"
 
-          # -X theirs: nightly is the source of truth, so shared
-          # files (incl. the rebranded config) resolve to the incoming side.
+          # Merge nightly into main, nightly is source of truth
           git merge -X theirs --no-ff --no-edit "origin/nightly"
 
-          node scripts/brands.js "beta"
+          node scripts/brands.js "main"
           git add -A
-          git diff --cached --quiet || git commit -m "chore(release): rebrand for beta"
+          git diff --cached --quiet || git commit -m "chore(release): rebrand for main"
 
-          if git diff --quiet "origin/beta" HEAD; then
-            echo "delta=none" >> "$GITHUB_ENV"
-          else
-            git push --force origin "$HEAD"
-            echo "delta=yes" >> "$GITHUB_ENV"
-          fi
-
-      - name: Compose promotion branch (beta → main)
-        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged
-        run: |
-          git config user.name "manix-bot"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          # Determine which PR was merged - check for nightly→beta branch
-          HEAD="promote/nightly-to-beta"
-          if git show-ref --verify --quiet refs/heads/$HEAD; then
-            # Nightly→beta PR was just merged, now promote beta→main
-            git checkout -B "promote/beta-to-main" "origin/main"
-            git merge -X theirs --no-ff --no-edit "origin/beta"
-            node scripts/brands.js "main"
-            git add -A
-            git diff --cached --quiet || git commit -m "chore(release): rebrand for main"
-            if ! git diff --quiet "origin/main" HEAD; then
-              git push --force origin "promote/beta-to-main"
-            fi
-          else
-            # Direct case: promote beta→main
-            HEAD="promote/beta-to-main"
-            git checkout -B "$HEAD" "origin/main"
-            git merge -X theirs --no-ff --no-edit "origin/beta"
-            node scripts/brands.js "main"
-            git add -A
-            git diff --cached --quiet || git commit -m "chore(release): rebrand for main"
-            if ! git diff --quiet "origin/main" HEAD; then
-              git push --force origin "$HEAD"
-            fi
-
-      - name: Open pull request (nightly → beta)
-        if: github.event_name == 'push' && env.delta == 'yes'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          HEAD="promote/nightly-to-beta"
-          if gh pr list --head "$HEAD" --base "beta" --state open --json number --jq '.[0].number' | grep -q .; then
-            echo "An open PR already exists — the force-push refreshed it."
-          else
-            gh pr create \
-              --base "beta" \
-              --head "$HEAD" \
-              --title "chore(release): promote Lumen (nightly) → Manix beta" \
-              --body "Automated promotion: nightly → beta. New pushes to nightly refresh this branch automatically."
-          fi
-
-      - name: Open pull request (beta → main)
-        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged && env.delta == 'yes'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          HEAD="promote/nightly-to-beta"
-          if gh pr list --head "$HEAD" --base "main" --state open --json number --jq '.[0].number' | grep -q .; then
-            echo "An open PR already exists — the force-push refreshed it."
-          else
-            gh pr create \
-              --base "main" \
-              --head "$HEAD" \
-              --title "chore(release): promote Manix beta → main" \
-              --body "Automated promotion: beta → main. The nightly → beta PR has been merged and this promotes to stable."
-          fi
+          git push --force origin "$HEAD"
