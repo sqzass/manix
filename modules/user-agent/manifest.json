@@ -1,0 +1,14 @@
+{
+    "user-agent": {
+        "id": "user-agent",
+        "name": "User Agent",
+        "description": "Spoof your browser's user agent string",
+        "type": "ua",
+        "version": "1.0.0",
+        "css": "user-agent/module.css",
+        "js": "user-agent/module.js",
+        "config": {
+            "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        }
+    }
+}

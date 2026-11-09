@@ -116,9 +116,9 @@
         b.addEventListener('click', () => setTheme(b.dataset.themeOpt, true));
 
     (async () => {
-        // --- Module system ---
-        if (cfg.moduleManifestUrl && self.ModuleSystem) {
-            await ModuleSystem.init(cfg.moduleManifestUrl);
+        // --- Module system (local compiled modules) ---
+        if (self.ModuleSystem) {
+            await ModuleSystem.init('modules/');
             for (const [id, hex] of ModuleSystem.API.accents) {
                 ACCENTS[id] = hex;
             }

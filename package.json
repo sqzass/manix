@@ -6,7 +6,8 @@
   "scripts": {
     "test": "node --test tests/",
     "lint": "eslint scripts extension/js tests",
-    "build": "zip -r extension.zip extension/",
+    "build": "node scripts/build-modules.js && zip -r extension.zip extension/",
+    "build:modules": "node scripts/build-modules.js",
     "rebrand:nightly": "node scripts/brands.js nightly",
     "rebrand:main": "node scripts/brands.js main"
   },

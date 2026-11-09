@@ -1,0 +1,15 @@
+{
+    "geolocation": {
+        "id": "geolocation",
+        "name": "Geolocation",
+        "description": "Spoof your browser's geolocation coordinates",
+        "type": "geolocation",
+        "version": "1.0.0",
+        "css": "geolocation/module.css",
+        "js": "geolocation/module.js",
+        "config": {
+            "latitude": 40.7128,
+            "longitude": -74.0060
+        }
+    }
+}

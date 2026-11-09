@@ -15,30 +15,26 @@
 
         _manifest: [],
         _enabled: new Set(),
+        _base: 'modules/',
 
-        async init(manifestUrl) {
+        async init(base = 'modules/') {
+            this._base = base;
             try {
                 const stored = await new Promise((res) => {
                     chrome.storage.sync.get('enabledModules', res);
                 });
                 this._enabled = new Set((stored && stored.enabledModules) || []);
-            } catch (e) {
-                // storage unavailable in this context
-            }
-
-            let base = manifestUrl;
-            try {
-                base = new URL('.', manifestUrl).href;
-            } catch (e) { /* keep raw url */ }
+            } catch (e) { /* storage unavailable in this context */ }
 
             try {
-                const resp = await fetch(manifestUrl);
+                const resp = await fetch(`${base}manifest.json`);
                 if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
                 const data = await resp.json();
-                this._manifest = (data.modules || []).map((m) => ({
+                this._manifest = Object.entries(data.modules || {}).map(([id, m]) => ({
+                    id,
                     ...m,
-                    css: m.css ? new URL(m.css, base).href : null,
-                    js: m.js ? new URL(m.js, base).href : null,
+                    css: m.css ? `${base}${m.css}` : null,
+                    js: m.js ? `${base}${m.js}` : null
                 }));
             } catch (e) {
                 console.error('[modules] manifest load failed:', e.message);
@@ -47,23 +43,29 @@
 
             for (const id of this._enabled) {
                 const mod = this._manifest.find(m => m.id === id);
-                if (mod) await this._load(mod);
+                if (mod) await this.enable(mod);
             }
         },
 
         get modules() { return this._manifest; },
         isEnabled(id) { return this._enabled.has(id); },
 
-        async toggle(id) {
-            const mod = this._manifest.find(m => m.id === id);
-            if (!mod) return false;
+        async enable(mod) {
+            if (this._enabled.has(mod.id)) return true;
+            this._enabled.add(mod.id);
 
-            if (this._enabled.has(id)) {
-                this._enabled.delete(id);
-                this._unload(id);
-            } else {
-                this._enabled.add(id);
-                await this._load(mod);
+            if (mod.css) {
+                const link = document.createElement('link');
+                link.id = `mod-css-${mod.id}`;
+                link.rel = 'stylesheet';
+                link.href = mod.css;
+                document.head.appendChild(link);
+            }
+            if (mod.js) {
+                const script = document.createElement('script');
+                script.id = `mod-js-${mod.id}`;
+                script.src = mod.js;
+                document.head.appendChild(script);
             }
 
             try {
@@ -72,44 +74,47 @@
                 });
             } catch (e) { /* storage unavailable */ }
 
-            return this._enabled.has(id);
+            try {
+                await new Promise((res) => {
+                    chrome.runtime.sendMessage({ action: 'applyModule', module: mod }, res);
+                });
+            } catch (e) { /* background may not be ready */ }
+
+            return true;
         },
 
-        _load(mod) {
-            return new Promise((resolve) => {
-                let done = 0;
-                const total = (mod.css ? 1 : 0) + (mod.js ? 1 : 0);
-                if (total === 0) { resolve(); return; }
-                const check = () => { if (++done >= total) resolve(); };
+        async disable(id) {
+            if (!this._enabled.has(id)) return false;
+            this._enabled.delete(id);
 
-                if (mod.css) {
-                    const link = document.createElement('link');
-                    link.id = `mod-css-${mod.id}`;
-                    link.rel = 'stylesheet';
-                    link.href = mod.css;
-                    link.onload = check;
-                    link.onerror = check;
-                    document.head.appendChild(link);
-                }
-
-                if (mod.js) {
-                    const script = document.createElement('script');
-                    script.id = `mod-js-${mod.id}`;
-                    script.src = mod.js;
-                    script.onload = check;
-                    script.onerror = check;
-                    document.head.appendChild(script);
-                }
-            });
-        },
-
-        _unload(id) {
             const css = document.getElementById(`mod-css-${id}`);
             if (css) css.remove();
             const js = document.getElementById(`mod-js-${id}`);
             if (js) js.remove();
+
+            try {
+                await new Promise((res) => {
+                    chrome.storage.sync.set({ enabledModules: [...this._enabled] }, res);
+                });
+            } catch (e) { /* storage unavailable */ }
+
+            try {
+                await new Promise((res) => {
+                    chrome.runtime.sendMessage({ action: 'removeModule', id }, res);
+                });
+            } catch (e) { /* background may not be ready */ }
+
+            return false;
+        },
+
+        async toggle(id) {
+            if (this.isEnabled(id)) return await this.disable(id);
+            const mod = this._manifest.find(m => m.id === id);
+            if (!mod) return false;
+            return await this.enable(mod);
         }
     };
 
     self.ModuleSystem = ModuleSystem;
 })();
+
